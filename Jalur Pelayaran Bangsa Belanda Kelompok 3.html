@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Animasi Antik Jalur Pelayaran Bangsa Belanda</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Google Fonts untuk nuansa antik/klasik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a120b;
+            color: #d5c3aa;
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: radial-gradient(#2b1e13 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        header {
+            background: linear-gradient(180deg, #2c1d11, #1a120b);
+            text-align: center;
+            padding: 25px 15px;
+            border-bottom: 3px double #b8860b;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.1rem;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px #000;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-family: 'IM Fell English SC', serif;
+            font-size: 1.1rem;
+            color: #b89775;
+            letter-spacing: 1px;
+        }
+
+        #main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Card Informasi Kelompok */
+        .card-kelompok {
+            width: 100%;
+            background: #23170f;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 20px 25px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .card-kelompok h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.4rem;
+            border-bottom: 1px solid #8b5a2b;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .anggota-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .anggota-grid li {
+            background: #2d1e15;
+            padding: 10px 15px;
+            border-left: 3px solid #d4af37;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #e5d3be;
+        }
+
+        /* Card Gambar Referensi Tunggal */
+        .card-referensi {
+            width: 100%;
+            background: #23170f;
+            border: 2px solid #8b5a2b;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .card-referensi h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .img-single {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .img-single img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 2px solid #b8860b;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+
+        .img-single p {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #a89078;
+            font-style: italic;
+        }
+
+        /* Container Peta Interaktif Antik */
+        #map-card {
+            width: 100%;
+            background: #23170f;
+            border: 3px double #b8860b;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+        }
+
+        #map-card h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Filter Sepia Antik pada Peta */
+        #map {
+            width: 100%;
+            height: 580px;
+            border-radius: 6px;
+            border: 2px solid #8b5a2b;
+            filter: sepia(0.6) hue-rotate(-15deg) contrast(1.15) brightness(0.9);
+        }
+
+        /* Marker Perahu Layar SVG */
+        .ship-marker-container {
+            background: rgba(184, 134, 11, 0.3);
+            border: 2px solid #d4af37;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 12px #d4af37;
+        }
+
+        .ship-icon-svg {
+            width: 24px;
+            height: 24px;
+            fill: #d4af37;
+        }
+
+        /* Marker Pin Lokasi Kustom */
+        .pin-label {
+            background: #1e120a;
+            color: #f3e5ab;
+            border: 1px solid #d4af37;
+            border-radius: 4px;
+            padding: 3px 7px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+        }
+
+        /* Pop-up Style Klasik */
+        .leaflet-popup-content-wrapper {
+            background: #2b1d14;
+            color: #e5d3be;
+            border: 2px solid #b8860b;
+            border-radius: 6px;
+            font-family: 'Georgia', serif;
+        }
+
+        .leaflet-popup-tip {
+            background: #2b1d14;
+        }
+
+        .popup-title {
+            color: #d4af37;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #8b5a2b;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+        }
+
+        .popup-desc {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #cbb89d;
+        }
+
+        /* Legenda Penanda Peta */
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+            padding: 12px;
+            background: #180f0a;
+            border: 1px solid #8b5a2b;
+            border-radius: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #cbb89d;
+        }
+
+        .legend-badge {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+            border: 1px solid #fff;
+        }
+
+        /* Panel Penjelasan Sejarah */
+        .info-panel {
+            width: 100%;
+            background: #23170f;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .info-panel h2 {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #8b5a2b;
+            padding-bottom: 8px;
+        }
+
+        .sejarah-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #d5c3aa;
+            text-align: justify;
+        }
+
+        .sejarah-text p {
+            margin-bottom: 12px;
+        }
+
+        .sejarah-text strong {
+            color: #d4af37;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #120a06;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            color: #8b5a2b;
+            border-top: 2px solid #2c1d11;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PETA JALUR PELAYARAN BANGSA BELANDA KE INDONESIA</h1>
+        <p>Ekspedisi Penjelajahan Samudra Abad ke-16 hingga ke-17</p>
+    </header>
+
+    <div id="main-container">
+
+        <!-- 1. Identitas Kelompok 3 -->
+        <div class="card-kelompok">
+            <h2>KELOMPOK 3</h2>
+            <ul class="anggota-grid">
+                <li>Ahmad Rizal Jaelani</li>
+                <li>Muhamad Candra Hidayat</li>
+                <li>Nadya Syfa Wulandari</li>
+                <li>Salsa Choerunisa</li>
+                <li>Muhamad Ravi Giffari</li>
+                <li>Ahmad Maulana</li>
+            </ul>
+        </div>
+
+        <!-- 2. Gambar Referensi Tunggal (26316.jpg) -->
+        <div class="card-referensi">
+            <h2>PETA ILUSTRASI REFERENSI HISTORIS</h2>
+            <div class="img-single">
+                <img src="26316.jpg" alt="Peta Jalur Pelayaran Bangsa Belanda" onerror="this.onerror=null; this.src='https://via.placeholder.com/800x450/2b1d14/d4af37?text=Gambar+26316.jpg+Tidak+Ditemukan+di+Folder';">
+                <p>Gambar Referensi: Jalur Pelayaran Bangsa Belanda</p>
+            </div>
+        </div>
+
+        <!-- 3. Peta Interaktif Antik dengan Animasi Perahu & Marker Titik -->
+        <div id="map-card">
+            <h2>PETA INTERAKTIF ANTIK, TITIK AWAL/TUJUAN & ANIMASI PERAHU</h2>
+            <div id="map"></div>
+
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="legend-badge" style="background-color: #22c55e;"></span>
+                    <span><strong>Titik Awal:</strong> Amsterdam (Belanda)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge" style="background-color: #eab308;"></span>
+                    <span><strong>Titik Transit:</strong> Afrika & Samudra</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge" style="background-color: #ef4444;"></span>
+                    <span><strong>Tujuan 1:</strong> Pelabuhan Banten (1596)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge" style="background-color: #a855f7;"></span>
+                    <span><strong>Tujuan 2:</strong> Kepulauan Maluku (1599)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Penjelasan Sejarah Ringkas -->
+        <div class="info-panel">
+            <h2>SEJARAH PENJELAJAHAN & RUTE PELAYARAN BELANDA</h2>
+            <div class="sejarah-text">
+                <p>
+                    <strong>Latar Belakang:</strong> Pada tahun 1580, Raja Spanyol menguasai Portugal dan menutup pelabuhan Lisboa bagi pedagang Belanda. Hal ini memaksa para pedagang Belanda untuk melakukan penjelajahan mandiri langsung menuju kepulauan Nusantara tempat ditemukannya rempah-rempah.
+                </p>
+                <p>
+                    <strong>1. Titik Keberangkatan (Amsterdam, Belanda - 1595):</strong> Ekspedisi pertama dipimpin oleh Cornelis de Houtman dan Pieter de Keyser bertolak dari pelabuhan Amsterdam dengan 4 kapal armada dagang.
+                </p>
+                <p>
+                    <strong>2. Titik Transit (Pantai Afrika & Tanjung Harapan):</strong> Rombongan kapal berlayar menyusuri samudra Atlantik, singgah di Pantai Barat Afrika (Senegal) lalu mengitari Ujung Selatan Afrika (Tanjung Harapan) dan menyeberangi Samudra Hindia.
+                </p>
+                <p>
+                    <strong>3. Titik Tujuan Pertama (Pelabuhan Banten - 1596):</strong> Armada Cornelis de Houtman berhasil masuk ke Nusantara melalui Selat Sunda dan mendarat di Banten pada 27 Juni 1596.
+                </p>
+                <p>
+                    <strong>4. Titik Tujuan Utama (Kepulauan Maluku - 1599):</strong> Pelayaran berikutnya dipimpin oleh Jacob van Neck. Mereka berlayar lebih jauh ke timur Indonesia hingga berhasil berlabuh di Ternate dan Banda (Maluku) untuk memuat rempah-rempah dalam jumlah besar.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Kelompok 3 &copy; Tugas Sejarah Peta Navigasi Bangsa Belanda</p>
+    </footer>
+
+    <!-- Leaflet JS Native -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // 1. Inisialisasi Peta
+        const map = L.map('map').setView([-2.0, 50.0], 2);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
+
+        // 2. Custom Icon Perahu Layar Bergerak
+        const shipIconHtml = `
+            <div class="ship-marker-container">
+                <svg class="ship-icon-svg" viewBox="0 0 24 24">
+                    <path d="M4 18.5C7 18.5 8.5 20 12 20C15.5 20 17 18.5 20 18.5L22 13H2L4 18.5Z"/>
+                    <path d="M11 2V12H18L11 2Z"/>
+                    <path d="M9 4.5V12H4L9 4.5Z"/>
+                </svg>
+            </div>
+        `;
+
+        const shipIcon = L.divIcon({
+            html: shipIconHtml,
+            className: '',
+            iconSize: [38, 38],
+            iconAnchor: [19, 19],
+            popupAnchor: [0, -19]
+        });
+
+        // 3. Titik Koordinat Penting (Awal, Transit, & Tujuan)
+        const titikLokasi = [
+            {
+                nama: "1. Amsterdam (Awal Keberangkatan)",
+                pos: [52.3676, 4.9041],
+                warna: "#22c55e",
+                desc: "<strong>Titik Awal:</strong> Pelabuhan Amsterdam, tempat keberangkatan armada Belanda (2 April 1595)."
+            },
+            {
+                nama: "2. Pantai Barat Afrika",
+                pos: [14.6937, -17.4441],
+                warna: "#eab308",
+                desc: "<strong>Titik Transit 1:</strong> Wilayah persinggahan perbekalan di sepanjang pantai Atlantik Afrika."
+            },
+            {
+                nama: "3. Tanjung Harapan",
+                pos: [-34.3568, 18.4740],
+                warna: "#eab308",
+                desc: "<strong>Titik Transit 2:</strong> Ujung selatan benua Afrika sebelum mengarungi Samudra Hindia."
+            },
+            {
+                nama: "4. Banten (Tujuan Pertama)",
+                pos: [-6.0333, 106.1500],
+                warna: "#ef4444",
+                desc: "<strong>Tujuan Pertama:</strong> Pelabuhan Banten, pendaratan Cornelis de Houtman pada 27 Juni 1596."
+            },
+            {
+                nama: "5. Maluku (Tujuan Utama Rempah)",
+                pos: [0.8000, 127.3833],
+                warna: "#a855f7",
+                desc: "<strong>Tujuan Utama:</strong> Kepulauan Maluku (Ternate & Banda), pusat rempah-rempah yang dicapai Jacob van Neck (1599)."
+            }
+        ];
+
+        // Memasang Pin Penanda Lokasi di Peta
+        titikLokasi.forEach(titik => {
+            const circleMarker = L.circleMarker(titik.pos, {
+                radius: 8,
+                fillColor: titik.warna,
+                color: '#ffffff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.9
+            }).addTo(map);
+
+            circleMarker.bindPopup(`
+                <div class="popup-title">${titik.nama}</div>
+                <div class="popup-desc">${titik.desc}</div>
+            `);
+
+            // Label Teks di Atas Pin
+            L.marker(titik.pos, {
+                icon: L.divIcon({
+                    className: 'pin-label',
+                    html: titik.nama.split(" ")[1] || titik.nama,
+                    iconAnchor: [-10, 15]
+                })
+            }).addTo(map);
+        });
+
+        // 4. Data Rute Pelayaran
+        const ruteHoutman = [
+            [52.3676, 4.9041],   // Amsterdam
+            [14.6937, -17.4441],  // Afrika Barat
+            [-34.3568, 18.4740],  // Tanjung Harapan
+            [-20.2, 44.3],        // Madagaskar
+            [-6.0333, 106.1500]   // Banten
+        ];
+
+        const ruteVanNeck = [
+            [-6.0333, 106.1500],  // Banten
+            [-7.2, 112.7],        // Tuban/Jawa
+            [0.8000, 127.3833]    // Maluku
+        ];
+
+        // Gambar Garis Lintasan
+        L.polyline(ruteHoutman, { color: '#f97316', weight: 3, dashArray: '6, 6' }).addTo(map);
+        L.polyline(ruteVanNeck, { color: '#a855f7', weight: 3, dashArray: '6, 6' }).addTo(map);
+
+        // 5. Perahu Layar Bergerak
+        const shipHoutman = L.marker(ruteHoutman[0], { icon: shipIcon }).addTo(map);
+        shipHoutman.bindPopup('<div class="popup-title">Kapal Cornelis de Houtman</div><div class="popup-desc">Sedang berlayar dari Belanda menuju Banten...</div>');
+
+        // Fungsi Animasi Perahu Bergerak
+        function animateShip(marker, path, speed) {
+            let i = 0;
+            let step = 0;
+            const stepsPerSegment = 120;
+
+            function move() {
+                if (i >= path.length - 1) {
+                    i = 0; // Ulangi lintasan dari awal
+                }
+
+                const start = path[i];
+                const end = path[i + 1];
+
+                const lat = start[0] + (end[0] - start[0]) * (step / stepsPerSegment);
+                const lng = start[1] + (end[1] - start[1]) * (step / stepsPerSegment);
+
+                marker.setLatLng([lat, lng]);
+
+                step++;
+                if (step > stepsPerSegment) {
+                    step = 0;
+                    i++;
+                }
+
+                setTimeout(move, speed);
+            }
+            move();
+        }
+
+        // Jalankan Animasi
+        animateShip(shipHoutman, ruteHoutman, 60);
+    </script>
+</body>
+</html>
